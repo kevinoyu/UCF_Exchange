@@ -3,10 +3,38 @@
 #include <deque>
 #include <vector>
 #include <algorithm>
-#include "Pool.h"
-
 
 enum class level_id_t : uint32_t {};
+#define MEMORY_DEFS    \
+  using __ptr = ptr_t; \
+  using size_t__ = typename std::underlying_type<ptr_t>::type;
+
+template <class T, typename ptr_t, size_t SIZE_HINT>
+class Pool
+{
+public:
+	MEMORY_DEFS;
+	std::vector<T> m_allocated;
+	std::vector<ptr_t> m_free;
+	Pool() { m_allocated.reserve(SIZE_HINT); }
+	Pool(size_t reserve_size) { m_allocated.reserve(reserve_size); }
+	T *get(ptr_t idx) { return &m_allocated[size_t__(idx)]; }
+	T &operator[](ptr_t idx) { return m_allocated[size_t__(idx)]; }
+	__ptr alloc(void)
+	{
+		if (m_free.empty()) {
+			auto ret = __ptr(m_allocated.size());
+			m_allocated.push_back(T());
+			return ret;
+		}
+		else {
+			auto ret = __ptr(m_free.back());
+			m_free.pop_back();
+			return ret;
+		}
+	}
+	void free(__ptr idx) { m_free.push_back(idx); }
+};
 
 struct Trade {
 	uint32_t qty;
@@ -39,13 +67,8 @@ struct PriceLevel {
 	PriceLevel(double _price, level_id_t _idx) : price(_price), level_idx(_idx) {}
 };
 
-bool operator>(Level a, Level b) {
-	return a.price > b.price;
-}
-
-bool operator>(PriceLevel a, PriceLevel b) {
-	return a.price > b.price;
-}
+bool operator>(Level a, Level b);  
+bool operator>(PriceLevel a, PriceLevel b);
 
 typedef std::vector<PriceLevel> Levels;
 typedef std::vector<Order> Orders;
@@ -58,9 +81,9 @@ public:
 	Book();
 	~Book();
 	static LevelPool levelPool; 
+	static const Orders* orders; // reference of global pool of orders in the exchange
 	Levels bids;
 	Levels asks;
-	Orders* orders; // pointer to global pool of orders in the exchange 
 	uint32_t processOrder(uint32_t order_id, Order* order, double price); // execute any crossed qty in the order, then add leftover qty as a new order
 	uint32_t cancelOrder(uint32_t order_id, Order* order);
 private:
@@ -70,5 +93,6 @@ private:
 	uint32_t addOrder(uint32_t order_id, Order* order, double price); // add an order to the exchange, should only be called by processOrders
 	uint32_t crossAsk(uint32_t order_id, Order* order, double price); // cross a
 	uint32_t crossBid(uint32_t order_id, Order* order, double price);
-	Order* getOrder(uint32_t order_id);
 };
+
+LevelPool Book::levelPool = LevelPool();

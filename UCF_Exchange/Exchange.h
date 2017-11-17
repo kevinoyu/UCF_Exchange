@@ -1,6 +1,14 @@
 #pragma once
+#ifndef __TRADER__H
+#define __TRADER__H
 #include "Trader.h"
+#endif // !__TRADER__H
+
+#ifndef __BOOK_H
+#define __BOOK_H
 #include "Book.h"
+#endif // !__BOOK_H
+
 #include <unordered_map>
 #include <string>
 #include <vector>
@@ -23,6 +31,6 @@ private:
 	Orders orders;
 	Traders traders;
 	uint32_t sec_count;
-	static uint32_t oid;
-	static uint32_t sid;
+	uint32_t oid;
+	uint32_t sid;
 };

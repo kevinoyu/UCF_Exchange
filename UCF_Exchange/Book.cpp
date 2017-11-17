@@ -1,9 +1,8 @@
 #include "book.h"
+
 Book::Book()
 {
-
 }
-
 
 Book::~Book()
 {
@@ -21,10 +20,10 @@ uint32_t Book::crossAsk(uint32_t order_id, Order * order, double price)
 		double trade_price = cur_level.price;
 		while (qty > 0 && cur_level.orders.size() > 0) {
 			uint32_t ask_id = cur_level.orders.front();
-			Order* ask_order = getOrder(ask_id);
-			trade_qty = ask_order->qty;
+			Order ask_order = (*orders)[ask_id];
+			trade_qty = ask_order.qty;
 			if (trade_qty > qty) {
-				ask_order->qty -= qty;
+				ask_order.qty -= qty;
 				qty = 0;
 				toNotify.emplace_back(qty, cur_level.price, order_id, ask_id);
 				exhausted = true;
@@ -32,7 +31,7 @@ uint32_t Book::crossAsk(uint32_t order_id, Order * order, double price)
 			}
 			else {
 				qty -= order->qty;
-				toNotify.emplace_back(order->qty, cur_level.price, order_id, ask_id);
+				toNotify.emplace_back(ask_order.qty, cur_level.price, order_id, ask_id);
 				cur_level.cancelOrder(ask_id, trade_qty);
 			}
 		}
@@ -56,18 +55,18 @@ uint32_t Book::crossBid(uint32_t order_id, Order * order, double price)
 		double trade_price = cur_level.price;
 		while (qty > 0 && cur_level.orders.size() > 0) {
 			uint32_t bid_id = cur_level.orders.front();
-			Order* bid_order = getOrder(bid_id);
-			trade_qty = bid_order->qty;
+			Order bid_order = (*orders)[bid_id];
+			trade_qty = bid_order.qty;
 			if (trade_qty > qty) {
-				order->qty -= qty;
+				bid_order.qty -= qty;
 				qty = 0;
 				toNotify.emplace_back(qty, cur_level.price, order_id, bid_id);
 				exhausted = true;
 				break;
 			}
 			else {
-				qty -= bid_order->qty;
-				toNotify.emplace_back(order->qty, cur_level.price, order_id, bid_id);
+				qty -= bid_order.qty;
+				toNotify.emplace_back(bid_order.qty, cur_level.price, order_id, bid_id);
 				cur_level.cancelOrder(bid_id, trade_qty);
 			}
 		}
@@ -77,12 +76,6 @@ uint32_t Book::crossBid(uint32_t order_id, Order * order, double price)
 		}
 	}
 	return qty;
-}
-
-
-Order * Book::getOrder(uint32_t order_id)
-{
-	return &((*orders)[order_id]);
 }
 
 uint32_t Book::processOrder(uint32_t order_id, Order * order, double price)
@@ -163,6 +156,7 @@ uint32_t Book::addOrder(uint32_t order_id, Order* order, double price)
 	}
 	levelPool[order->level_idx].qty += order->qty;
 	levelPool[order->level_idx].orders.push_back(order_id);
+	return 0;
 }
 
 uint32_t Level::cancelOrder(uint32_t order_id, uint32_t qty)
@@ -176,4 +170,14 @@ uint32_t Level::cancelOrder(uint32_t order_id, uint32_t qty)
 	else {
 		return -3;
 	}
+}
+
+bool operator>(Level a, Level b)
+{
+	return a.price > b.price;
+}
+
+bool operator>(PriceLevel a, PriceLevel b)
+{
+	return a.price > b.price;
 }
