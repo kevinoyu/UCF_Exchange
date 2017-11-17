@@ -1,7 +1,7 @@
 #include "Exchange.h"
 
-Exchange::Exchange(std::string fileName)
-{
+Exchange::Exchange(std::string fileName) {
+
 }
 
 Exchange::~Exchange()
@@ -10,7 +10,7 @@ Exchange::~Exchange()
 
 uint32_t Exchange::registerSecurity(std::string sec_name)
 {
-	books[sid] = Book();
+	books.push_back(Book());
 	this->sec_map.insert(Secmap::value_type(sec_name, sid));
 	sid++;
 	return 0;
@@ -39,7 +39,6 @@ uint32_t Exchange::cancelOrder( uint32_t order_id, uint32_t trader_id)
 {
 	Order *order = &(orders[order_id]);
 	if (trader_id != order->trader_id) return -1;
-	if (order->qty == 0) return -2;
 	else {
 		return books[order->book_id].cancelOrder(order_id, order);
 	}

@@ -3,6 +3,7 @@
 #include <deque>
 #include <vector>
 #include <algorithm>
+#include <sstream>
 
 /*
 Dynamic pool allocator, used to keep levels adjacent in order to exploit cache coherency for orderbook updates
@@ -94,11 +95,11 @@ public:
 	Levels asks; // vector of asks
 	uint32_t processOrder(uint32_t order_id, Order* order, double price); // execute any crossed qty in the order, then add leftover qty as a new order
 	uint32_t cancelOrder(uint32_t order_id, Order* order); // cancel an order, and remove level if that was last order in the level
-private:
 	Trades toNotify;
 	double best_ask; // best ask price in the market
 	double best_bid; // best bid price in the market
 	uint32_t addOrder(uint32_t order_id, Order* order, double price); // add an order to the exchange, should only be called by processOrders
 	uint32_t crossAsk(uint32_t order_id, Order* order, double price); // cross asks until order can no longer be filled, return unfilled qty
 	uint32_t crossBid(uint32_t order_id, Order* order, double price); // cross bids until order can no longer be filled, return unfilled qty
+	std::string toString();
 };

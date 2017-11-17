@@ -1,9 +1,5 @@
 #include "book.h"
 
-Book::Book()
-{
-}
-
 Book::~Book()
 {
 }
@@ -18,6 +14,7 @@ uint32_t Book::crossAsk(uint32_t order_id, Order * order, double price)
 	bool exhausted = false;
 	while (iter++ != (asks.end() - 1)) {
 		PriceLevel &cur = *iter;
+		if (exhausted || cur.price > price) break;
 		Level cur_level = levelPool[cur.level_idx];
 		uint32_t trade_qty = 0;
 		double trade_price = cur_level.price;
@@ -40,7 +37,6 @@ uint32_t Book::crossAsk(uint32_t order_id, Order * order, double price)
 			}
 		}
 
-		if (exhausted || cur.price > price) break;
 	}
 	return qty;
 }
@@ -52,6 +48,8 @@ uint32_t Book::crossBid(uint32_t order_id, Order * order, double price)
 	bool exhausted = false;
 	while (iter-- != asks.begin()) {
 		PriceLevel &cur = *iter;
+		if (exhausted || cur.price < price) break;
+
 		Level cur_level = levelPool[cur.level_idx];
 		uint32_t trade_qty = 0;
 		double trade_price = cur_level.price;
@@ -73,10 +71,36 @@ uint32_t Book::crossBid(uint32_t order_id, Order * order, double price)
 				cur_level.cancelOrder(bid_id, trade_qty);
 			}
 		}
-
-		if (exhausted || cur.price > price) break;
 	}
 	return qty;
+}
+
+std::string Book::toString()
+{
+	std::ostringstream out;
+	auto iter = bids.begin();
+	out << "bids: " << std::endl;
+	while (iter++ != bids.end()) {
+		auto level = levelPool[iter->level_idx];
+		out << level.price << ":" << level.qty;
+		auto order_iter = level.orders->begin();
+		while (order_iter++ != level.orders->end()) {
+			out << " " << *order_iter;
+		}
+		out << std::endl;
+	}
+	out << "asks: " << std::endl;
+	iter = asks.begin();
+	while (iter++ != bids.end()) {
+		auto level = levelPool[iter->level_idx];
+		out << level.price << ":" << level.qty;
+		auto order_iter = level.orders->begin();
+		while (order_iter++ != level.orders->end()) {
+			out << " " << *order_iter;
+		}
+		out << std::endl;
+	}
+	return out.str();
 }
 
 uint32_t Book::processOrder(uint32_t order_id, Order * order, double price)
@@ -105,6 +129,7 @@ uint32_t Book::cancelOrder(uint32_t order_id, Order* order)
 			if (iter->price == levelPool[order->level_idx].price) {
 				level->erase(++iter);
 				levelPool.free(order->level_idx);
+				break;
 			}
 		}	
 	}
@@ -117,41 +142,31 @@ uint32_t Book::addOrder(uint32_t order_id, Order* order, double price)
 	Levels* levels = order->isBuy ? &bids : &asks;
 	bool found = false;
 	auto iter = levels->end();
-	if (order->isBuy) {
+	if (levels->empty()) {
+		iter += order->isBuy ? -1 : 1;
+	} 
+	else {
 		while (iter-- != levels->begin()) {
 			PriceLevel &cur = *iter;
 			if (cur.price == price) {
 				order->level_idx = cur.level_idx;
 				found = true;
+				break;
 			}
 			else if (price > cur.price) {
 				break;
 			}
 		}
 	}
-	else {
-		iter = levels->begin();
-		auto last = levels->end() - 1;
-		while (iter++ != last) {
-			PriceLevel &cur = *iter;
-			if (cur.price == price) {
-				order->level_idx = cur.level_idx;
-				found = true;
-			}
-			else if (price > cur.price) {
-				break;
-			}
-		}
-	}
-
+	
 	if (!found) {
 		order->level_idx = levelPool.alloc();
 		levelPool[order->level_idx].qty = 0;
 		levelPool[order->level_idx].price = price;
 		PriceLevel const pl(price, order->level_idx);
-		iter += order->isBuy ? 1 : -1;
+		iter++;
 		if (iter == asks.begin()) best_ask = price;
-		else if (iter == (bids.end() - 1)) best_bid = price; 
+		else if (iter == (bids.end() - 1)) best_bid = price;
 		levels->insert(iter, pl);
 	}
 	levelPool[order->level_idx].qty += order->qty;
@@ -162,14 +177,10 @@ uint32_t Book::addOrder(uint32_t order_id, Order* order, double price)
 uint32_t Level::cancelOrder(uint32_t order_id, uint32_t qty)
 {
 	auto it = std::find(orders->begin(), orders->end(), order_id);
-	if (it != orders->end()) {
-		this->qty -= qty;
-		orders->erase(it);
-		return this->qty;
-	}
-	else {
-		return -3;
-	}
+	if (it == orders->end()) return -2;
+	this->qty -= qty;
+	orders->erase(it);
+	return this->qty;
 }
 
 bool operator>(Level a, Level b)
