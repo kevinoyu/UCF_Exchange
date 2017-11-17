@@ -27,7 +27,7 @@ public:
 	uint32_t cancelOrder(uint32_t order_id, uint32_t trader_id );
 private:
 	Secmap sec_map;
-	Books books;
+	Books books; // Vector of books, each representing a security
 	Orders orders;
 	Traders traders;
 	uint32_t sec_count;

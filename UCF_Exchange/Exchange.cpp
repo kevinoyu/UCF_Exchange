@@ -1,6 +1,10 @@
 #include "Exchange.h"
 
 
+Exchange::Exchange(std::string fileName)
+{
+}
+
 Exchange::~Exchange()
 {
 }

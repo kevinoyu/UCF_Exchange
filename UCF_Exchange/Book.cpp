@@ -21,8 +21,8 @@ uint32_t Book::crossAsk(uint32_t order_id, Order * order, double price)
 		Level cur_level = levelPool[cur.level_idx];
 		uint32_t trade_qty = 0;
 		double trade_price = cur_level.price;
-		while (qty > 0 && cur_level.orders.size() > 0) {
-			uint32_t ask_id = cur_level.orders.front();
+		while (qty > 0 && cur_level.orders->size() > 0) {
+			uint32_t ask_id = cur_level.orders->front();
 			Order ask_order = (*orders)[ask_id];
 			trade_qty = ask_order.qty;
 			if (trade_qty > qty) {
@@ -56,8 +56,8 @@ uint32_t Book::crossBid(uint32_t order_id, Order * order, double price)
 		Level cur_level = levelPool[cur.level_idx];
 		uint32_t trade_qty = 0;
 		double trade_price = cur_level.price;
-		while (qty > 0 && cur_level.orders.size() > 0) {
-			uint32_t bid_id = cur_level.orders.front();
+		while (qty > 0 && cur_level.orders->size() > 0) {
+			uint32_t bid_id = cur_level.orders->front();
 			Order bid_order = (*orders)[bid_id];
 			trade_qty = bid_order.qty;
 			if (trade_qty > qty) {
@@ -101,7 +101,7 @@ uint32_t Book::processOrder(uint32_t order_id, Order * order, double price)
 uint32_t Book::cancelOrder(uint32_t order_id, Order* order)
 {
 	int32_t toRet = levelPool[order->level_idx].cancelOrder(order_id, order->qty);
-	if (levelPool[order->level_idx].orders.size() == 0) {
+	if (levelPool[order->level_idx].orders->size() == 0) {
 		Levels *level = order->isBuy ? &bids : &asks;
 		auto iter = level->end();
 		while (iter-- != level->begin()){

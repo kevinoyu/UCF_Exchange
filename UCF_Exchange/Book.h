@@ -4,16 +4,17 @@
 #include <vector>
 #include <algorithm>
 
+/*
+Dynamic pool allocator, used to keep levels adjacent in order to exploit cache coherency for orderbook updates
+*/
 enum class level_id_t : uint32_t {};
-#define MEMORY_DEFS    \
-  using __ptr = ptr_t; \
-  using size_t__ = typename std::underlying_type<ptr_t>::type;
-
 template <class T, typename ptr_t, size_t SIZE_HINT>
 class Pool
 {
 public:
-	MEMORY_DEFS;
+
+	using __ptr = ptr_t; 
+	using size_t__ = typename std::underlying_type<ptr_t>::type;
 	std::vector<T> m_allocated;
 	std::vector<ptr_t> m_free;
 	Pool() { m_allocated.reserve(SIZE_HINT); }
@@ -36,6 +37,7 @@ public:
 	void free(__ptr idx) { m_free.push_back(idx); }
 };
 
+// Struct containing information for trade notifications
 struct Trade {
 	uint32_t qty;
 	double price;
@@ -44,6 +46,8 @@ struct Trade {
 	Trade(uint32_t _qty, double _price, uint32_t _buy, uint32_t _sell) : qty(_qty), price(_price), buy_id(_buy), sell_id(_sell) {}
 };
 
+// Struct representing order metadata
+//		ID is implied by position in the exchange order pool to save space
 struct Order {
 	bool isBuy;
 	uint32_t qty;
@@ -54,23 +58,27 @@ struct Order {
 		: isBuy(_isBuy), qty(_qty), book_id(_book_id), trader_id(_trader_id) {}
 };
 
+// struct represent Price Level metadata
 struct Level{
 	double price;
 	uint32_t qty;
-	std::deque<uint32_t> orders;
+	std::deque<uint32_t>* orders;
 	uint32_t cancelOrder(uint32_t order_id, uint32_t qty);
 };
 
+// struct pointing to Levels - used to exploit cache coherency
 struct PriceLevel {
-	double price;
-	level_id_t level_idx;
+	double price; // store local copy of price to save need for dereference
+	level_id_t level_idx; // idx of level metadata in the shared level pool
 	PriceLevel(double _price, level_id_t _idx) : price(_price), level_idx(_idx) {}
 };
 
-bool operator>(Level a, Level b);  
+bool operator>(Level a, Level b);
 bool operator>(PriceLevel a, PriceLevel b);
 
-typedef std::vector<PriceLevel> Levels;
+// Typedefs to clean up code
+//		convention: std::vector<type> = Types
+typedef std::vector<PriceLevel> Levels;  
 typedef std::vector<Order> Orders;
 typedef std::vector<Trade> Trades;
 typedef Pool<Level, level_id_t, 1 << 20> LevelPool;
@@ -80,17 +88,17 @@ class Book
 public:
 	Book();
 	~Book();
-	static LevelPool levelPool; 
-	static const Orders* orders; // reference of global pool of orders in the exchange
-	Levels bids;
-	Levels asks;
+	static LevelPool levelPool; // pointer to global pool of Price levels 
+	static const Orders* orders; // pointer to global pool of orders in the exchange
+	Levels bids; // vector of bids
+	Levels asks; // vector of asks
 	uint32_t processOrder(uint32_t order_id, Order* order, double price); // execute any crossed qty in the order, then add leftover qty as a new order
-	uint32_t cancelOrder(uint32_t order_id, Order* order);
+	uint32_t cancelOrder(uint32_t order_id, Order* order); // cancel an order, and remove level if that was last order in the level
 private:
 	Trades toNotify;
 	double best_ask; // best ask price in the market
 	double best_bid; // best bid price in the market
 	uint32_t addOrder(uint32_t order_id, Order* order, double price); // add an order to the exchange, should only be called by processOrders
-	uint32_t crossAsk(uint32_t order_id, Order* order, double price); // cross a
-	uint32_t crossBid(uint32_t order_id, Order* order, double price);
+	uint32_t crossAsk(uint32_t order_id, Order* order, double price); // cross asks until order can no longer be filled, return unfilled qty
+	uint32_t crossBid(uint32_t order_id, Order* order, double price); // cross bids until order can no longer be filled, return unfilled qty
 };
