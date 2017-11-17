@@ -35,6 +35,6 @@ uint32_t Exchange::cancelOrder( uint32_t order_id, uint32_t trader_id)
 	if (trader_id != order->trader_id) return -1;
 	if (order->qty == 0) return -2;
 	else {
-		return books[order->book_id].cancelOrder(order_id, order->level_idx);
+		return books[order->book_id].cancelOrder(order_id, order);
 	}
 }

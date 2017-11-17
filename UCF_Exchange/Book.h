@@ -5,6 +5,9 @@
 #include <algorithm>
 #include "Pool.h"
 
+
+enum class level_id_t : uint32_t {};
+
 struct Trade {
 	uint32_t qty;
 	double price;
@@ -16,11 +19,11 @@ struct Trade {
 struct Order {
 	bool isBuy;
 	uint32_t qty;
-	uint32_t level_idx;
+	level_id_t level_idx;
 	uint32_t book_id;
 	uint32_t trader_id;
 	Order(bool _isBuy, uint32_t _qty, uint32_t _book_id, uint32_t _trader_id)
-		: isBuy(_isBuy), qty(_qty), level_idx(0), book_id(_book_id), trader_id(_trader_id) {}
+		: isBuy(_isBuy), qty(_qty), book_id(_book_id), trader_id(_trader_id) {}
 };
 
 struct Level{
@@ -32,8 +35,8 @@ struct Level{
 
 struct PriceLevel {
 	double price;
-	uint32_t level_idx;
-	PriceLevel(double _price, uint32_t _idx) : price(_price), level_idx(_idx) {}
+	level_id_t level_idx;
+	PriceLevel(double _price, level_id_t _idx) : price(_price), level_idx(_idx) {}
 };
 
 bool operator>(Level a, Level b) {
@@ -47,19 +50,19 @@ bool operator>(PriceLevel a, PriceLevel b) {
 typedef std::vector<PriceLevel> Levels;
 typedef std::vector<Order> Orders;
 typedef std::vector<Trade> Trades;
-typedef Pool<Level, uint32_t, 1 << 20> LevelPool;
+typedef Pool<Level, level_id_t, 1 << 20> LevelPool;
 
 class Book
 {
 public:
 	Book();
 	~Book();
-	LevelPool levelPool; 
+	static LevelPool levelPool; 
 	Levels bids;
 	Levels asks;
 	Orders* orders; // pointer to global pool of orders in the exchange 
 	uint32_t processOrder(uint32_t order_id, Order* order, double price); // execute any crossed qty in the order, then add leftover qty as a new order
-	uint32_t cancelOrder(uint32_t order_id, uint32_t level_idx);
+	uint32_t cancelOrder(uint32_t order_id, Order* order);
 private:
 	Trades toNotify;
 	double best_ask; // best ask price in the market

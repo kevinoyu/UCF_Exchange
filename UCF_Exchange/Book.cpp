@@ -1,6 +1,7 @@
 #include "book.h"
 Book::Book()
 {
+
 }
 
 
@@ -101,17 +102,16 @@ uint32_t Book::processOrder(uint32_t order_id, Order * order, double price)
 	return qty;
 }
 
-uint32_t Book::cancelOrder(uint32_t order_id, uint32_t level_idx)
+uint32_t Book::cancelOrder(uint32_t order_id, Order* order)
 {
-	Order* order = getOrder(order_id);
-	Levels *level = order->isBuy ? &bids : &asks;
-	int32_t toRet = levelPool[level_idx].cancelOrder(order_id, qty);
-	if (levelPool[level_idx].orders.size() == 0) {
+	int32_t toRet = levelPool[order->level_idx].cancelOrder(order_id, order->qty);
+	if (levelPool[order->level_idx].orders.size() == 0) {
+		Levels *level = order->isBuy ? &bids : &asks;
 		auto iter = level->end();
 		while (iter-- != level->begin()){
-			if (iter->price == levelPool[level_idx].price) {
+			if (iter->price == levelPool[order->level_idx].price) {
 				level->erase(++iter);
-				levelPool.free(level_idx);
+				levelPool.free(order->level_idx);
 			}
 		}	
 	}
