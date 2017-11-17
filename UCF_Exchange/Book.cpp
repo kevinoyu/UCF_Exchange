@@ -107,13 +107,16 @@ uint32_t Book::cancelOrder(uint32_t order_id, uint32_t level_idx)
 {
 	Order* order = getOrder(order_id);
 	bool isBid = order->qty > 0;
+	Levels *level = isBid ? &bids : &asks;
 	int32_t toRet = levelPool[level_idx].cancelOrder(order_id);
-	if (levelPool[level_idx].qty == 0) {
-		if (isBid) {
-			auto iter = bids.end() {
-				if (iter->price == )
+	if (levelPool[level_idx].orders.size() == 0) {
+		auto iter = level->end();
+		while (iter-- != level->begin()){
+			if (iter->price == levelPool[level_idx]->price) {
+				level->erase(++iter);
+				levelPool.free(level_idx);
 			}
-		}
+		}	
 	}
 	return toRet;
 }
