@@ -86,7 +86,7 @@ typedef Pool<Level, level_id_t, 1 << 20> LevelPool;
 class Book
 {
 public:
-	Book();
+	Book() : bids(Levels()), asks(Levels()), best_ask(100000), best_bid(0), toNotify(Trades()) {};
 	~Book();
 	static LevelPool levelPool; // pointer to global pool of Price levels 
 	static const Orders* orders; // pointer to global pool of orders in the exchange
