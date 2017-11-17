@@ -113,12 +113,12 @@
   <ItemGroup>
     <ClInclude Include="Book.h" />
     <ClInclude Include="Exchange.h" />
-    <ClInclude Include="Pool.h" />
     <ClInclude Include="Trader.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Book.cpp" />
     <ClCompile Include="Exchange.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="Trader.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
