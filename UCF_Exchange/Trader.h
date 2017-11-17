@@ -3,9 +3,6 @@
 #include "Book.h"
 #endif 
 
-
-typedef std::vector<Trader> Traders;
-
 class Trader
 {
 public:
@@ -14,3 +11,5 @@ public:
 private:
 	Orders order;
 };
+
+typedef std::vector<Trader> Traders;

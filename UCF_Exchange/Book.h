@@ -14,19 +14,20 @@ struct Trade {
 };
 
 struct Order {
-	int32_t qty;
+	bool isBuy;
+	uint32_t qty;
 	uint32_t level_idx;
 	uint32_t book_id;
 	uint32_t trader_id;
-	Order(uint32_t _qty, uint32_t _book_id, uint32_t _trader_id)
-		: qty(_qty), level_idx(0), book_id(_book_id), trader_id(_trader_id) {}
+	Order(bool _isBuy, uint32_t _qty, uint32_t _book_id, uint32_t _trader_id)
+		: isBuy(_isBuy), qty(_qty), level_idx(0), book_id(_book_id), trader_id(_trader_id) {}
 };
 
 struct Level{
 	double price;
 	uint32_t qty;
 	std::deque<uint32_t> orders;
-	uint32_t cancelOrder(uint32_t order_id);
+	uint32_t cancelOrder(uint32_t order_id, uint32_t qty);
 };
 
 struct PriceLevel {
@@ -45,7 +46,6 @@ bool operator>(PriceLevel a, PriceLevel b) {
 
 typedef std::vector<PriceLevel> Levels;
 typedef std::vector<Order> Orders;
-typedef std::vector<Book> Books;
 typedef std::vector<Trade> Trades;
 typedef Pool<Level, uint32_t, 1 << 20> LevelPool;
 
