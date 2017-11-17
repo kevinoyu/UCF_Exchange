@@ -21,10 +21,11 @@ uint32_t Book::crossAsk(uint32_t order_id, Order * order, double price)
 		Level cur_level = levelPool[cur.level_idx];
 		uint32_t trade_qty = 0;
 		double trade_price = cur_level.price;
-		while (qty > 0 && cur_level.orders->size() > 0) {
+		while (cur_level.orders->size() > 0) {
 			uint32_t ask_id = cur_level.orders->front();
 			Order ask_order = (*orders)[ask_id];
 			trade_qty = ask_order.qty;
+			best_ask = cur.price;
 			if (trade_qty > qty) {
 				ask_order.qty -= qty;
 				qty = 0;
@@ -39,9 +40,7 @@ uint32_t Book::crossAsk(uint32_t order_id, Order * order, double price)
 			}
 		}
 
-		if (exhausted || cur.price > price) {
-			break;
-		}
+		if (exhausted || cur.price > price) break;
 	}
 	return qty;
 }
@@ -60,6 +59,7 @@ uint32_t Book::crossBid(uint32_t order_id, Order * order, double price)
 			uint32_t bid_id = cur_level.orders->front();
 			Order bid_order = (*orders)[bid_id];
 			trade_qty = bid_order.qty;
+			best_bid = cur.price;
 			if (trade_qty > qty) {
 				bid_order.qty -= qty;
 				qty = 0;
@@ -74,9 +74,7 @@ uint32_t Book::crossBid(uint32_t order_id, Order * order, double price)
 			}
 		}
 
-		if (exhausted || cur.price > price) {
-			break;
-		}
+		if (exhausted || cur.price > price) break;
 	}
 	return qty;
 }
@@ -90,7 +88,6 @@ uint32_t Book::processOrder(uint32_t order_id, Order * order, double price)
 	else if (!order->isBuy && price <= best_bid) {
 		qty = crossBid(order_id, order, price);
 	}
-
 	if (qty > 0) {
 		order->qty = qty;
 		addOrder(order_id, order, price);
@@ -158,16 +155,16 @@ uint32_t Book::addOrder(uint32_t order_id, Order* order, double price)
 		levels->insert(iter, pl);
 	}
 	levelPool[order->level_idx].qty += order->qty;
-	levelPool[order->level_idx].orders.push_back(order_id);
+	levelPool[order->level_idx].orders->push_back(order_id);
 	return 0;
 }
 
 uint32_t Level::cancelOrder(uint32_t order_id, uint32_t qty)
 {
-	auto it = std::find(orders.begin(), orders.end(), order_id);
-	if (it != orders.end()) {
+	auto it = std::find(orders->begin(), orders->end(), order_id);
+	if (it != orders->end()) {
 		this->qty -= qty;
-		orders.erase(it);
+		orders->erase(it);
 		return this->qty;
 	}
 	else {
