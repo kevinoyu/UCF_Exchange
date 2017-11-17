@@ -26,7 +26,7 @@ struct Level{
 	double price;
 	uint32_t qty;
 	std::deque<uint32_t> orders;
-	uint32_t cancelOrder(uint32_t order_id);ca
+	uint32_t cancelOrder(uint32_t order_id);
 };
 
 struct PriceLevel {
@@ -62,10 +62,10 @@ public:
 	uint32_t cancelOrder(uint32_t order_id, uint32_t level_idx);
 private:
 	Trades toNotify;
-	double best_ask;
-	double best_bid;
-	uint32_t addOrder(uint32_t order_id, Order* order, double price);
-	uint32_t crossAsk(uint32_t order_id, Order* order, double price);
+	double best_ask; // best ask price in the market
+	double best_bid; // best bid price in the market
+	uint32_t addOrder(uint32_t order_id, Order* order, double price); // add an order to the exchange, should only be called by processOrders
+	uint32_t crossAsk(uint32_t order_id, Order* order, double price); // cross a
 	uint32_t crossBid(uint32_t order_id, Order* order, double price);
 	Order* getOrder(uint32_t order_id);
 };

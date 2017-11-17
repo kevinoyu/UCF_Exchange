@@ -9,8 +9,8 @@ public:
 	MEMORY_DEFS;
 	std::vector<T> m_allocated;
 	std::vector<ptr_t> m_free;
-	pool() { m_allocated.reserve(SIZE_HINT); }
-	pool(size_t reserve_size) { m_allocated.reserve(reserve_size); }
+	Pool() { m_allocated.reserve(SIZE_HINT); }
+	Pool(size_t reserve_size) { m_allocated.reserve(reserve_size); }
 	T *get(ptr_t idx) { return &m_allocated[size_t__(idx)]; }
 	T &operator[](ptr_t idx) { return m_allocated[size_t__(idx)]; }
 #define ALLOC_INVARIANT \

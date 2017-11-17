@@ -115,7 +115,7 @@ uint32_t Book::cancelOrder(uint32_t order_id, uint32_t level_idx)
 			}
 		}
 	}
-	return toret;
+	return toRet;
 }
 
 uint32_t Book::addOrder(uint32_t order_id, Order* order, double price)
