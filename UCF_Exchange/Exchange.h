@@ -19,7 +19,7 @@ typedef std::vector<Book> Books;
 class Exchange
 {
 public:
-	Exchange(std::string fileName);
+	Exchange(std::string fileName) : orders(Orders()), oid(0), sid(0), traders(Traders()), sec_map(Secmap()), books(Books());
 	~Exchange();
 	uint32_t registerTrader();
 	uint32_t registerSecurity(std::string sec_name);

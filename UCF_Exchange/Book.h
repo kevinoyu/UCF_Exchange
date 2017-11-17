@@ -94,5 +94,3 @@ private:
 	uint32_t crossAsk(uint32_t order_id, Order* order, double price); // cross a
 	uint32_t crossBid(uint32_t order_id, Order* order, double price);
 };
-
-LevelPool Book::levelPool = LevelPool();

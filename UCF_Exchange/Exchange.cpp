@@ -1,12 +1,5 @@
 #include "Exchange.h"
 
-Exchange::Exchange(std::string filename)
-{
-	Book::orders = &orders;
-	oid = 0;
-	sid = 0;
-}
-
 
 Exchange::~Exchange()
 {

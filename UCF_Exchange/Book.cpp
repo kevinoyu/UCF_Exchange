@@ -8,6 +8,9 @@ Book::~Book()
 {
 }
 
+LevelPool Book::levelPool = LevelPool();
+const Orders * Book::orders = &Orders(); 
+
 uint32_t Book::crossAsk(uint32_t order_id, Order * order, double price)
 {
 	uint32_t qty = order->qty;
