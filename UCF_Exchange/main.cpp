@@ -1,14 +1,12 @@
 #include "Exchange.h"
 #include <iostream>
+#define _ITERATOR_DEBUG_LEVEL 0
 
 int main() {
 	Exchange e = Exchange();
-	uint32_t t = e.registerSecurity("AAPL");
-	for (int i = 50; i < 100; i++) {
-		e.addOrder("AAPL", 100, i, 314);
-		e.addOrder("AAPL", -100, i + 100, 314);
-	}
-	e.cancelOrder(0, 314);
-	e.cancelOrder(99, 314);
-	std::cout << e.books[0].toString();
+	//uint32_t t = e.registerSecurity("AAPL");
+	//e.addOrder("AAPL", 100, 10, 314);
+	//e.addOrder("AAPL", 100, 9, 314);
+	//e.addOrder("AAPL", 100, 8, 314);
+	//e.addOrder("AAPL", -50, 10, 314);
 }

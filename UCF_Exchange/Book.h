@@ -13,7 +13,6 @@ template <class T, typename ptr_t, size_t SIZE_HINT>
 class Pool
 {
 public:
-
 	using __ptr = ptr_t; 
 	using size_t__ = typename std::underlying_type<ptr_t>::type;
 	std::vector<T> m_allocated;
@@ -63,7 +62,7 @@ struct Order {
 struct Level{
 	double price;
 	uint32_t qty;
-	std::deque<uint32_t>* orders;
+	std::deque<uint32_t> orders;
 	uint32_t cancelOrder(uint32_t order_id, uint32_t qty);
 };
 
@@ -77,8 +76,6 @@ struct PriceLevel {
 bool operator>(Level a, Level b);
 bool operator>(PriceLevel a, PriceLevel b);
 
-// Typedefs to clean up code
-//		convention: std::vector<type> = Types
 typedef std::vector<PriceLevel> Levels;  
 typedef std::vector<Order> Orders;
 typedef std::vector<Trade> Trades;
@@ -87,19 +84,20 @@ typedef Pool<Level, level_id_t, 1 << 20> LevelPool;
 class Book
 {
 public:
-	Book() : bids(Levels()), asks(Levels()), best_ask(100000), best_bid(0), toNotify(Trades()) {};
+	Book() : best_ask(100000), best_bid(0) {};
+	Book(Orders* o) : orders(o), best_ask(100000), best_bid(0) {};
 	~Book();
 	static LevelPool levelPool; // pointer to global pool of Price levels 
-	static const Orders* orders; // pointer to global pool of orders in the exchange
-	Levels bids; // vector of bids
-	Levels asks; // vector of asks
 	uint32_t processOrder(uint32_t order_id, Order* order, double price); // execute any crossed qty in the order, then add leftover qty as a new order
 	uint32_t cancelOrder(uint32_t order_id, Order* order); // cancel an order, and remove level if that was last order in the level
+private:
+	Levels bids; // vector of bids, sorted from best price to worst
+	Levels asks; // vector of asks, sorted from best price to worst
 	Trades toNotify;
 	double best_ask; // best ask price in the market
 	double best_bid; // best bid price in the market
+	Orders* orders; // pointer to global pool of orders in the exchange
 	uint32_t addOrder(uint32_t order_id, Order* order, double price); // add an order to the exchange, should only be called by processOrders
 	uint32_t crossAsk(uint32_t order_id, Order* order, double price); // cross asks until order can no longer be filled, return unfilled qty
 	uint32_t crossBid(uint32_t order_id, Order* order, double price); // cross bids until order can no longer be filled, return unfilled qty
-	std::string toString();
 };
