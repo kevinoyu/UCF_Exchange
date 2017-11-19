@@ -9,7 +9,7 @@ Exchange::~Exchange()
 
 uint32_t Exchange::registerSecurity(std::string sec_name)
 {
-	books.push_back(Book(&orders));
+	books.emplace_back(&orders);
 	this->sec_map.insert(Secmap::value_type(sec_name, sid));
 	sid++;
 	return 0;

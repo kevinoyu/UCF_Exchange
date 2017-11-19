@@ -107,6 +107,7 @@ uint32_t Book::cancelOrder(uint32_t order_id, Order* order)
 uint32_t Book::addOrder(uint32_t order_id, Order* order, double price)
 {
 	bool found = false;
+	bool better = false;
 
 	if (order->isBuy)
 	{
@@ -118,12 +119,14 @@ uint32_t Book::addOrder(uint32_t order_id, Order* order, double price)
 				break;
 			}
 			else if (price > cur->price) break;
+			better = true;
 		}
 		if (!found) {
 			order->level_idx = levelPool.alloc();
 			levelPool[order->level_idx].qty = 0;
 			levelPool[order->level_idx].price = price;
 			bids.emplace(cur, price, order->level_idx);
+			if (!better) best_bid = price;
 		}
 		levelPool[order->level_idx].qty += order->qty;
 		levelPool[order->level_idx].orders.push_back(order_id);
@@ -138,12 +141,14 @@ uint32_t Book::addOrder(uint32_t order_id, Order* order, double price)
 				break;
 			}
 			else if (price < cur->price) break;
+			better = true;
 		}
 		if (!found) {
 			order->level_idx = levelPool.alloc();
 			levelPool[order->level_idx].qty = 0;
 			levelPool[order->level_idx].price = price;
 			asks.emplace(cur, price, order->level_idx);
+			if (!better) best_ask = price;
 		}
 		levelPool[order->level_idx].qty += order->qty;
 		levelPool[order->level_idx].orders.push_back(order_id);

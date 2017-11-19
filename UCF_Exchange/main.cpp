@@ -1,12 +1,20 @@
 #include "Exchange.h"
 #include <iostream>
-#define _ITERATOR_DEBUG_LEVEL 0
+#include <ctime>
+#include <stdio.h>
 
 int main() {
 	Exchange e = Exchange();
-	//uint32_t t = e.registerSecurity("AAPL");
-	//e.addOrder("AAPL", 100, 10, 314);
-	//e.addOrder("AAPL", 100, 9, 314);
-	//e.addOrder("AAPL", 100, 8, 314);
-	//e.addOrder("AAPL", -50, 10, 314);
+	uint32_t ta = e.registerSecurity("AAPL");
+	clock_t t;
+	t = clock();
+	for (int i = 50; i < 100; i++) {
+		for (int j = -1000; j < 1000; ++j) 
+		{
+			e.addOrder("AAPL", j, i, 314);
+			e.addOrder("AAPL", j, i, 314);
+		}
+	}
+	t = clock() - t; 
+	printf("It took %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
 }
