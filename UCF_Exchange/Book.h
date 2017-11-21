@@ -3,7 +3,6 @@
 #include <deque>
 #include <vector>
 #include <algorithm>
-#include <sstream>
 
 /*
 Dynamic pool allocator, used to keep levels adjacent in order to exploit cache coherency for orderbook updates

@@ -1,7 +1,5 @@
-#ifndef __BOOK_H
-#define __BOOK_H
+#pragma once
 #include "Book.h"
-#endif 
 
 class Trader
 {
