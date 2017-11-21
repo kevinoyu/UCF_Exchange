@@ -7,6 +7,11 @@ Exchange::~Exchange()
 {
 }
 
+ErrorCode Exchange::registerTrader()
+{
+	return ErrorCode::OK;
+}
+
 ErrorCode Exchange::registerSecurity(std::string sec_name)
 {
 	books.emplace_back(&orders);

@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <string>
 #include <vector>
+#include "uWS\uWS.h"
 
 typedef std::unordered_map<std::string, uint32_t> Secmap;
 typedef std::vector<Book> Books;
