@@ -12,7 +12,6 @@ int main() {
 		for (int j = -1000; j < 1000; ++j) 
 		{
 			e.addOrder("AAPL", j, i, 314);
-			e.addOrder("AAPL", j, i, 314);
 		}
 	}
 	t = clock() - t; 

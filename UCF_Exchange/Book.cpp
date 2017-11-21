@@ -5,6 +5,7 @@ Book::~Book()
 }
 
 LevelPool Book::levelPool = LevelPool();
+
 uint32_t Book::crossAsk(uint32_t order_id, Order * order, double price)
 {
 	uint32_t qty = order->qty;
@@ -70,7 +71,7 @@ uint32_t Book::crossBid(uint32_t order_id, Order * order, double price)
 	return qty;
 }
 
-uint32_t Book::processOrder(uint32_t order_id, Order * order, double price)
+ErrorCode Book::processOrder(uint32_t order_id, Order * order, double price)
 {
 	int32_t qty = order->qty;
 	if (order->isBuy && price >= best_ask) {
@@ -85,12 +86,12 @@ uint32_t Book::processOrder(uint32_t order_id, Order * order, double price)
 		order->qty = qty;
 		addOrder(order_id, order, price);
 	}
-	return qty;
+	return ErrorCode::OK;
 }
 
-uint32_t Book::cancelOrder(uint32_t order_id, Order* order)
+ErrorCode Book::cancelOrder(uint32_t order_id, Order* order)
 {
-	int32_t toRet = levelPool[order->level_idx].cancelOrder(order_id, order->qty);
+	ErrorCode toRet = levelPool[order->level_idx].cancelOrder(order_id, order->qty);
 	if (levelPool[order->level_idx].orders.size() == 0) {
 		Levels *levels = order->isBuy ? &bids : &asks;
 		for (auto iter = levels->end(); iter-- != levels->begin();) {
@@ -104,7 +105,7 @@ uint32_t Book::cancelOrder(uint32_t order_id, Order* order)
 	return toRet;
 }
 
-uint32_t Book::addOrder(uint32_t order_id, Order* order, double price)
+ErrorCode Book::addOrder(uint32_t order_id, Order* order, double price)
 {
 	bool found = false;
 	bool better = false;
@@ -154,16 +155,16 @@ uint32_t Book::addOrder(uint32_t order_id, Order* order, double price)
 		levelPool[order->level_idx].orders.push_back(order_id);
 	}
 
-	return 0;
+	return ErrorCode::OK;
 }
 
-uint32_t Level::cancelOrder(uint32_t order_id, uint32_t qty)
+ErrorCode Level::cancelOrder(uint32_t order_id, uint32_t qty)
 {
 	auto it = std::find(orders.begin(), orders.end(), order_id);
-	if (it == orders.end()) return -2;
+	if (it == orders.end()) return ErrorCode::INVALID_ORDER;
 	this->qty -= qty;
 	orders.erase(it);
-	return this->qty;
+	return ErrorCode::OK;
 }
 
 bool operator>(Level a, Level b)

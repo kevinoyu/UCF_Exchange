@@ -4,6 +4,16 @@
 #include <vector>
 #include <algorithm>
 
+
+typedef enum {
+	OK = 0,
+	ID_MISMATCH = -1,
+	INVALID_ORDER = -2,
+	INVALD_PRICE = -3,
+	INVALID_SECURITY = -4,
+	EXCEEDS_LIMITS = -5
+} ErrorCode;
+
 /*
 Dynamic pool allocator, used to keep levels adjacent in order to exploit cache coherency for orderbook updates
 */
@@ -62,7 +72,7 @@ struct Level{
 	double price;
 	uint32_t qty;
 	std::deque<uint32_t> orders;
-	uint32_t cancelOrder(uint32_t order_id, uint32_t qty);
+	ErrorCode cancelOrder(uint32_t order_id, uint32_t qty);
 };
 
 // struct pointing to Levels - used to exploit cache coherency
@@ -80,6 +90,7 @@ typedef std::vector<Order> Orders;
 typedef std::vector<Trade> Trades;
 typedef Pool<Level, level_id_t, 1 << 20> LevelPool;
 
+
 class Book
 {
 public:
@@ -87,8 +98,8 @@ public:
 	Book(Orders* o) : orders(o), best_ask(100000), best_bid(0) {};
 	~Book();
 	static LevelPool levelPool; // pointer to global pool of Price levels 
-	uint32_t processOrder(uint32_t order_id, Order* order, double price); // execute any crossed qty in the order, then add leftover qty as a new order
-	uint32_t cancelOrder(uint32_t order_id, Order* order); // cancel an order, and remove level if that was last order in the level
+	ErrorCode processOrder(uint32_t order_id, Order* order, double price); // execute any crossed qty in the order, then add leftover qty as a new order
+	ErrorCode cancelOrder(uint32_t order_id, Order* order); // cancel an order, and remove level if that was last order in the level
 private:
 	Levels bids; // vector of bids, sorted from best price to worst
 	Levels asks; // vector of asks, sorted from best price to worst
@@ -96,7 +107,7 @@ private:
 	double best_ask; // best ask price in the market
 	double best_bid; // best bid price in the market
 	Orders* orders; // pointer to global pool of orders in the exchange
-	uint32_t addOrder(uint32_t order_id, Order* order, double price); // add an order to the exchange, should only be called by processOrders
+	ErrorCode addOrder(uint32_t order_id, Order* order, double price); // add an order to the exchange, should only be called by processOrders
 	uint32_t crossAsk(uint32_t order_id, Order* order, double price); // cross asks until order can no longer be filled, return unfilled qty
 	uint32_t crossBid(uint32_t order_id, Order* order, double price); // cross bids until order can no longer be filled, return unfilled qty
 };
