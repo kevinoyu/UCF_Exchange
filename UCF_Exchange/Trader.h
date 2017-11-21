@@ -6,6 +6,7 @@ class Trader
 public:
 	Trader();
 	~Trader();
+	ErrorCode addOrder(uint32_t order_id);
 private:
 	Orders order;
 };

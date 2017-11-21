@@ -5,7 +5,8 @@
 #include <algorithm>
 
 
-typedef enum {
+typedef enum ErrorCode 
+{
 	OK = 0,
 	ID_MISMATCH = -1,
 	INVALID_ORDER = -2,

@@ -23,10 +23,16 @@ ErrorCode Exchange::addOrder(std::string security, int qty, double price, uint32
 
 ErrorCode Exchange::addOrder(uint32_t book_id, int qty, double price, uint32_t trader_id)
 {
-	orders.emplace_back(qty > 0, uint32_t(std::abs(qty)), book_id, trader_id);
-	books[book_id].processOrder(oid, &orders[oid], price);
-	oid++;
-	return ErrorCode::OK;
+	ErrorCode trader_status = traders[trader_id].addOrder(oid);
+	if (trader_status == ErrorCode::OK) {
+		ErrorCode book_status = books[book_id].processOrder(oid, &orders[oid], price);
+		if (book_status == ErrorCode::OK)  {
+			orders.emplace_back(qty > 0, uint32_t(std::abs(qty)), book_id, trader_id);
+			oid++;
+		}
+		return book_status;
+	}
+	return trader_status;
 }
 
 ErrorCode Exchange::cancelOrder( uint32_t order_id, uint32_t trader_id)

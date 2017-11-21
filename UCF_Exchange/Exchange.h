@@ -7,6 +7,13 @@
 typedef std::unordered_map<std::string, uint32_t> Secmap;
 typedef std::vector<Book> Books;
 
+typedef enum MessageType 
+{
+	REGISTER,
+	ORDER,
+	CANCEL
+} MessageType;
+
 class Exchange
 {
 public:

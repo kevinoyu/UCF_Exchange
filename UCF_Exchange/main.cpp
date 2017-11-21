@@ -9,7 +9,7 @@ int main() {
 	clock_t t;
 	t = clock();
 	for (int i = 50; i < 100; i++) {
-		for (int j = -1000; j < 1000; ++j) 
+		for (int j = -100; j < 100; ++j) 
 		{
 			e.addOrder("AAPL", j, i, 314);
 		}
