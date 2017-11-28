@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 int main() {
-	Exchange e = Exchange();
+	Exchange e;
 	uint32_t ta = e.registerSecurity("AAPL");
 	clock_t t;
 	t = clock();
