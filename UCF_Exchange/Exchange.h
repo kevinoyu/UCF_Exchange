@@ -3,7 +3,8 @@
 #include <unordered_map>
 #include <string>
 #include <vector>
-#include <uWS.h>
+#include "uWS.h"
+#include "rapidjson.h"
 
 typedef std::unordered_map<std::string, uint32_t> Secmap;
 typedef std::vector<Book> Books;
@@ -14,11 +15,6 @@ typedef enum MessageType
 	ORDER,
 	CANCEL
 } MessageType;
-
-struct Message {
-	MessageType type;
-	std::string token;
-};
 
 class Exchange
 {
@@ -41,4 +37,5 @@ private:
 	uint32_t sid;
 	uWS::Hub h;
 	void processMessages();
+	void handleMessage();
 };
