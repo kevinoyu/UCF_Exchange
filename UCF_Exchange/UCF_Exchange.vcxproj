@@ -87,7 +87,7 @@
       <WarningLevel>Level1</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)uWS\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)uWS\src;$(SolutionDir)rapidjson;</AdditionalIncludeDirectories>
       <SuppressStartupBanner>false</SuppressStartupBanner>
     </ClCompile>
     <Link>
@@ -116,7 +116,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)uWS\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)uWS\src;$(SolutionDir)rapidjson;</AdditionalIncludeDirectories>
       <SuppressStartupBanner>false</SuppressStartupBanner>
     </ClCompile>
     <Link>
@@ -129,6 +129,7 @@
   <ItemGroup>
     <ClInclude Include="Book.h" />
     <ClInclude Include="Exchange.h" />
+    <ClInclude Include="mpsc.h" />
     <ClInclude Include="Trader.h" />
   </ItemGroup>
   <ItemGroup>
