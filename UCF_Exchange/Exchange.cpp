@@ -11,15 +11,16 @@ Exchange::~Exchange()
 
 MessageQueuePool Exchange::mqp = MessageQueuePool();
 
-ErrorCode Exchange::registerTrader()
+ErrorCode Exchange::registerTrader(const char * address)
 {
+	t_map.insert(TraderMap::value_type(address, tid++));
   return ErrorCode::OK;
 }
 
 ErrorCode Exchange::registerSecurity(std::string sec_name)
 {
   books.emplace_back(&orders, sec_name);
-  this->sec_map.insert(Secmap::value_type(sec_name, Security(sid)));
+  sec_map.insert(SecurityMap::value_type(sec_name, Security(sid)));
   sid++;
   return ErrorCode::OK;
 }
@@ -54,20 +55,22 @@ void Exchange::initFromFile(std::string filename)
 
 void Exchange::run(uint32_t port) {
   h.onMessage([this](uWS::WebSocket<uWS::SERVER> *ws, char *message, size_t length, uWS::OpCode opCode) {
-    rapidjson::Document d;
+    const char * address = ws->getAddress().address;
+	  uint32_t trader_id = t_map[address];
+	  rapidjson::Document d;
     d.Parse(message);
     const char* raw_type = d["message_type"].GetString();
-
+	
     switch (raw_type[0])
     {
     case 'R':
-      registerTrader();
+      registerTrader(address);
+	  break;
     case 'M':
     {
       rapidjson::Value& orders = d["orders"];
       rapidjson::Value& cancels = d["cancels"];
 
-      uint32_t trader_id = d["token"].GetInt();
 
       if(!orders.IsArray()) { return; }
       for(auto& ord : orders.GetArray())
@@ -85,13 +88,13 @@ void Exchange::run(uint32_t port) {
       }
 
       if(!cancels.IsArray()) { return; }
-      for (auto& ord : cancels.getArray())
+      for (auto& ord : cancels.GetArray())
       {
         std::string sec_name = ord["ticker"].GetString();
         Message msg(
             MessageType::CANCEL,
             sec_name,
-            ord["order_id"].GetString(),
+            atoi(ord["order_id"].GetString()),
             -1,
             -1,
             trader_id);
@@ -99,6 +102,7 @@ void Exchange::run(uint32_t port) {
         mqueue->enqueue(msg);
       }
     }
+	break;
     default:
       return;
     }
@@ -106,20 +110,24 @@ void Exchange::run(uint32_t port) {
   });
 
   h.onConnection([this](uWS::WebSocket<uWS::SERVER> *ws, uWS::HttpRequest req) {
-
+	  
   });
+
+  if (h.listen(port)) {
+	  h.run();
+  }
 }
 
 void Exchange::handleBooks(uint32_t num, uint32_t sequence) {
   while (true) {
     for (uint32_t i = sequence; i < sequence + num; i++) {
       Book book = books[i];
-      MessageQueue_id_t mqid = sec_map[books.sec_name].messages;
-      MessageQueue* mqueue = Exchange::mqp.get(messages);
+      MessageQueue_id_t mqid = sec_map[book.sec_name].messages;
+      MessageQueue* mqueue = Exchange::mqp.get(mqid);
       if(mqueue == nullptr) { continue; }
       // Handle orders in the given book
       Message msg;
-      while(mqueue->dequeue(msg)) {
+      if(mqueue->dequeue(msg)) {
         switch(msg.type) {
         case MessageType::REGISTER:
           ErrorCode exchange_status = registerTrader();

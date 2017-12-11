@@ -6,7 +6,6 @@
 #include <string>
 #include <vector>
 
-
 typedef enum ErrorCode
 {
   OK = 0,

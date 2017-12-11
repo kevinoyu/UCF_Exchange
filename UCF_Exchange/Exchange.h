@@ -58,27 +58,30 @@ struct Security
   ~Security();
 };
 
-typedef std::unordered_map<std::string, Security> Secmap;
+typedef std::unordered_map<std::string, Security> SecurityMap;
+typedef std::unordered_map<char *, uint32_t> TraderMap; 
 
 class Exchange
 {
 public:
-  Exchange() : orders(Orders()), oid(0), sid(0), traders(Traders()), sec_map(Secmap()), books(Books()) {};
+  Exchange() : orders(Orders()), oid(0), sid(0), tid(0), traders(Traders()), sec_map(SecurityMap()), books(Books()) {};
   Exchange(std::string fileName);
   ~Exchange();
   static MessageQueuePool mqp; // pool for order queues to be used by individual securities; preserves locality of queues for each thread handling a block of securities
 
   bool acceptingConnections;
-  Secmap sec_map;
+  SecurityMap sec_map;
+  TraderMap t_map; 
   Books books; // Vector of books, each representing a security
   Orders orders;
   Traders traders;
   uint32_t sec_count;
   uint32_t oid;
   uint32_t sid;
+  uint32_t tid;
   uWS::Hub h;
 
-  ErrorCode registerTrader();
+  ErrorCode registerTrader(const char * address);
   ErrorCode registerSecurity(std::string sec_name);
   ErrorCode addOrder(const uint32_t& book_id, const Message& msg);
   ErrorCode cancelOrder(const uint32_t& book_id, const Message& msg);
