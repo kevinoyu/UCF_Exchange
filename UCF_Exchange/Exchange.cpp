@@ -20,7 +20,7 @@ ErrorCode Exchange::registerTrader(const char * address)
 ErrorCode Exchange::registerSecurity(std::string sec_name)
 {
   books.emplace_back(&orders, sec_name);
-  sec_map.insert(SecurityMap::value_type(sec_name, Security(sid)));
+  sec_map.emplace(sec_name, Security(sid));
   sid++;
   return ErrorCode::OK;
 }
@@ -70,8 +70,7 @@ void Exchange::run(uint32_t port) {
     {
       rapidjson::Value& orders = d["orders"];
       rapidjson::Value& cancels = d["cancels"];
-
-
+      
       if(!orders.IsArray()) { return; }
       for(auto& ord : orders.GetArray())
       {
@@ -124,19 +123,17 @@ void Exchange::handleBooks(uint32_t num, uint32_t sequence) {
       Book book = books[i];
       MessageQueue_id_t mqid = sec_map[book.sec_name].messages;
       MessageQueue* mqueue = Exchange::mqp.get(mqid);
+      ErrorCode exchange_status;
       if(mqueue == nullptr) { continue; }
       // Handle orders in the given book
       Message msg;
       if(mqueue->dequeue(msg)) {
         switch(msg.type) {
-        case MessageType::REGISTER:
-          ErrorCode exchange_status = registerTrader();
-          break;
         case MessageType::ORDER:
-          ErrorCode exchange_status = addOrder(i, msg);
+          exchange_status = addOrder(i, msg);
           break;
         case MessageType::CANCEL:
-          ErrorCode exchange_status = cancelOrder(i, msg);
+          exchange_status = cancelOrder(i, msg);
           break;
         default:
           break;

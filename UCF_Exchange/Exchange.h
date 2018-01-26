@@ -54,12 +54,13 @@ struct Security
 {
   uint32_t book_id;
   MessageQueue_id_t messages;
+  Security() : book_id(-1) {};
   Security(uint32_t id);
   ~Security();
 };
 
 typedef std::unordered_map<std::string, Security> SecurityMap;
-typedef std::unordered_map<char *, uint32_t> TraderMap; 
+typedef std::unordered_map<const char *, uint32_t> TraderMap; 
 
 class Exchange
 {
