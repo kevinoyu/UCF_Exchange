@@ -4,11 +4,15 @@
 #include <stdio.h>
 #include <thread>
 
+// args - case file, port num
 int main(int argc, char* argv[]) {
 	Exchange e;
 	if (argc > 2) {
 		e.initFromFile(argv[1]);
-	}
+	  // spawn book handlers
+    // spawn trader handlers
+    e.run(atoi(argv[2]));
+  }
 	
 
 	/*

@@ -108,6 +108,7 @@ private:
   Levels bids; // vector of bids, sorted from best price to worst
   Levels asks; // vector of asks, sorted from best price to worst
   Trades toNotify;
+  // Exchange * exchange;
   double best_ask; // best ask price in the market
   double best_bid; // best bid price in the market
   Orders* orders; // pointer to global pool of orders in the exchange

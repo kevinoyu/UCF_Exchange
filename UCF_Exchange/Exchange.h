@@ -75,6 +75,7 @@ public:
   TraderMap t_map; 
   Books books; // Vector of books, each representing a security
   Orders orders;
+  Trades toNotify;
   Traders traders;
   uint32_t sec_count;
   uint32_t oid;
@@ -84,9 +85,11 @@ public:
 
   ErrorCode registerTrader(const char * address);
   ErrorCode registerSecurity(std::string sec_name);
+  ErrorCode processTrade(Trade trade); // Update trader states based on trade data returned from Book's toNotify Queue, add to global onTrade broadcast queue
   ErrorCode addOrder(const uint32_t& book_id, const Message& msg);
   ErrorCode cancelOrder(const uint32_t& book_id, const Message& msg);
   void initFromFile(std::string filename);
   void run(uint32_t port);
   void handleBooks(uint32_t num, uint32_t sequence); // handle num # of contiguous books
+  void handleTraders(uint32_t num, uint32_t sequence); // handle num # of contiguous traders, updating position, pnl, fines, fees, rebates, open orders etc.
 };
